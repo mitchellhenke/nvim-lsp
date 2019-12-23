@@ -1,39 +1,17 @@
-local skeleton = require 'nvim_lsp/skeleton'
-local util = require 'nvim_lsp/util'
-local lsp = vim.lsp
+local nvim_lsp = require'nvim_lsp'
+local configs = require'nvim_lsp/skeleton'
 
-local server_name = "elixir_ls"
-local bin_name = "/Users/mitchellhenke/.config/elixir-ls/language_server.sh"
-
-local root_pattern = util.root_pattern(".git")
-
-skeleton[server_name] = {
-  default_config = util.utf8_config {
-    cmd = {bin_name};
-    filetypes = {"ex", "exs", "eex"};
-    root_dir = function(fname)
-      return root_pattern(fname) or vim.loop.os_homedir()
-    end;
-    log_level = lsp.protocol.MessageType.Warning;
-    settings = {};
-  };
-  docs = {
-    description = [[
-https://github.com/vscode-langservers/vscode-css-languageserver-bin
-
-`css-languageserver` can be installed via `:LspInstall cssls` or by yourself with `npm`:
-```sh
-npm install -g vscode-css-languageserver-bin
-```
-]];
+if not nvim_lsp.elixir_ls then
+  configs.elixir_ls = {
     default_config = {
-      root_dir = [[root_pattern(".git")]];
-      on_init = [[function to handle changing offsetEncoding]];
-      capabilities = [[default capabilities, with offsetEncoding utf-8]];
+      cmd = {'/Users/mitchellhenke/.config/elixir-ls/language_server.sh'};
+      filetypes = {'ex', 'exs', 'eex'};
+      root_dir = function(fname)
+        return nvim_lsp.util.find_git_ancestor(fname) or vim.loop.os_homedir()
+      end;
+      log_level = vim.lsp.protocol.MessageType.Warning;
+      settings = {};
     };
-  };
-}
-
-skeleton[server_name].install = installer.install
-skeleton[server_name].install_info = installer.info
--- vim:et ts=2 sw=2
+  }
+end
+nvim_lsp.elixir_ls.setup{}
